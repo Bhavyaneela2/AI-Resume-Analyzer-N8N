@@ -1,0 +1,191 @@
+{
+  "name": "AI Resume Analyser",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "formTitle": "AI Resume Analyser",
+        "formDescription": "Upload your resume in PDF format and receive an AI-powered analysis including resume score, strengths, missing skills, improvement suggestions, and recommended job roles.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "RESUME",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3c4895d3-e0a1-4255-8e45-9614e5806367",
+      "name": "On form submission",
+      "webhookId": "d369546a-7d90-414a-ab81-a53a5f5e3eee",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "PXM9GJzhkRRqMdp4",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "RESUME",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "5c9d91d5-fdac-4838-b49d-e9084b1c52da",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3-flash-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a Senior Resume Reviewer, ATS Expert, and Hiring Manager.\n\nAnalyze the resume provided below and generate a professional report.\n\nResume:\n{{$json.text}}\n\nResume Analysis Report\nResume Score\n\nOverall Score: X/100\n\nATS Score\n\nATS Compatibility: X/100\n\nExperience Score\n\nExperience Relevance: X/100\n\nSkills Score\n\nTechnical & Soft Skills: X/100\n\nExecutive Summary\n\nProvide a concise professional summary of the candidate's profile, strengths, and career readiness.\n\nKey Strengths\nStrength 1\nStrength 2\nStrength 3\nStrength 4\nStrength 5\nMissing Skills\n\nList important missing technical skills, tools, certifications, or keywords that are commonly required for the candidate's target roles.\n\nSkill 1\nSkill 2\nSkill 3\nSkill 4\nSkill 5\nImprovement Suggestions\nImprovement suggestion\nImprovement suggestion\nImprovement suggestion\nImprovement suggestion\nImprovement suggestion\nATS Optimization Recommendations\nAdd missing keywords\nImprove section formatting\nQuantify achievements\nOptimize project descriptions\nImprove skill categorization\nRecommended Job Roles\nJob Role\tMatch Percentage\tReason\nRole 1\tXX%\tExplanation\nRole 2\tXX%\tExplanation\nRole 3\tXX%\tExplanation\nRole 4\tXX%\tExplanation\nRole 5\tXX%\tExplanation\nOverall Verdict\n\nProvide a hiring-manager-style assessment covering:\n\nCurrent employability level\nATS readiness\nInterview readiness\nKey areas to improve\nFinal recommendation\n\nUse professional HR language and clear formatting."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "f345e8ba-0bb5-48a3-9857-764bb3220db1",
+      "name": "Message a model",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "lbgTMOhbXsOHbngc",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $node[\"Extract from File\"].json.text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/)?.[0] }}",
+        "subject": "Your Professional Resume Analysis Report",
+        "emailType": "text",
+        "message": "={{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        0
+      ],
+      "id": "eed8b6b1-773a-464c-85e1-f4cfa8a2c5ca",
+      "name": "Send a message",
+      "webhookId": "c094b0b3-0973-4c2c-ae15-f02a31a6579a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "PjI8ukKCTYcknuBR",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "RESUME": [
+            {
+              "filename": "RESUME_BHAVANA1.pdf",
+              "mimetype": "application/pdf",
+              "size": 194786
+            }
+          ],
+          "submittedAt": "2026-06-09T15:16:24.065+05:30",
+          "formMode": "test"
+        },
+        "binary": {
+          "RESUME": {
+            "mimeType": "application/pdf",
+            "fileType": "pdf",
+            "fileExtension": "pdf",
+            "data": "filesystem-v2",
+            "fileName": "RESUME_BHAVANA1.pdf",
+            "id": "filesystem-v2:workflows/C13Y8G5vSlxbX9uc/executions/temp/binary_data/05fd16ec-d2a0-413d-b6a8-7a81c758841b",
+            "fileSize": "195 kB",
+            "bytes": 194786
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ba3d25f1-287b-4386-9810-1c54cfb0126d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3c8ae31e66e7294b8a88a8e22e02ddcb1ce9a6e5410dcbbb97e475bddb83f16a"
+  },
+  "nodeGroups": [],
+  "id": "C13Y8G5vSlxbX9uc",
+  "tags": []
+}
